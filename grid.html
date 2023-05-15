@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Grille hexagonale imbriquée</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1500px" height="700px"></canvas>
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        var size = 40; // taille d'un hexagone
+        var cols = Math.floor(canvas.width / (size / 2)); // nombre de colonnes
+        var rows = Math.floor(canvas.height / (size / 2)); // nombre de lignes
+
+        var alpha = 2 * Math.PI / 6;
+
+        var delta = 0; //alpha / 2; //0.2 * alpha; //0.5 * alpha;
+
+        // fonction pour dessiner un hexagone
+        function drawHexagon(x, y) {
+            ctx.beginPath();
+            ctx.moveTo(x + size * Math.cos(delta), y + size * Math.sin(delta));
+            for (var i = 1; i <= 6; i++) {
+                ctx.lineTo(x + size * Math.cos((i * alpha) + delta), y + size * Math.sin((i * alpha) + delta));
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        // dessiner la grille
+        for (var x = 0; x < rows; x++) {
+            for (var y = 0; y < cols; y++) {
+                var coordX = x * 3 * Math.cos(alpha) * size;
+                var coordY = y * 2 * Math.sin(alpha) * size + (x % 2) * Math.sin(alpha) * size;
+                drawHexagon(coordX, coordY);
+            }
+        }
+    </script>
+</body>
+
+</html>
