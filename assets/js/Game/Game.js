@@ -13,9 +13,6 @@ class Game extends GameBase { //A renommer ?
         this.FPS = 60;
         this.prevTick = 0;
 
-        /*----------------Game----------------*/
-        this.playerToPlay = 1;
-
         /*----------------Mouse----------------*/
 
         this.mousePressed = false;
@@ -35,6 +32,18 @@ class Game extends GameBase { //A renommer ?
 
         this.alpha = 2 * Math.PI / 6;
 
+        this.coordsGrid = [
+            [-1, -1, -1, -1, 0, 0, 0, 1, 1], //-1  => vide
+            [-1, -1, -1, 0, 0, 0, 0, 1, 1], // 1  => Player 1
+            [-1, -1, 0, 0, 0, 0, 1, 1, 1], // 2  => Player 2
+            [-1, 2, 0, 0, 0, 2, 1, 1, 1], // 0  => Neutre
+            [2, 2, 2, 0, 2, 0, 1, 1, 2],
+            [2, 2, 2, 0, 0, 0, 0, 1, -1],
+            [2, 2, 2, 0, 0, 0, 0, -1, -1],
+            [2, 2, 0, 0, 0, 0, -1, -1, -1],
+            [2, 2, 0, 0, 0, -1, -1, -1, -1],
+        ];
+
         this.actionGrid = [
             [-1, -1, -1, -1, 0, 0, 0, 0, 0], //-1  => vide
             [-1, -1, -1, 0, 0, 0, 0, 0, 0], // 1  => select
@@ -47,6 +56,11 @@ class Game extends GameBase { //A renommer ?
             [0, 0, 0, 0, 0, -1, -1, -1, -1],
         ];
 
+        /*----------------Game----------------*/
+        this.playerToPlay = 1;
+        this.abalone = new Abalone(); //Instance du jeu
+        this.coordsGrid = this.abalone.grid; //recup la bonne grille
+
         /**--------------Screen settings--------------*/
         this.resize();
         this.initMap();
@@ -58,27 +72,16 @@ class Game extends GameBase { //A renommer ?
     }
 
     initMap() {
-        let coordsGrid = [
-            [-1, -1, -1, -1, 0, 0, 0, 1, 1], //-1  => vide
-            [-1, -1, -1, 0, 0, 0, 0, 1, 1], // 1  => Player 1
-            [-1, -1, 0, 0, 0, 0, 1, 1, 1], // 2  => Player 2
-            [-1, 2, 0, 0, 0, 0, 1, 1, 1], // 0  => Neutre
-            [2, 2, 2, 0, 0, 0, 1, 1, 1],
-            [2, 2, 2, 0, 0, 0, 0, 1, -1],
-            [2, 2, 2, 0, 0, 0, 0, -1, -1],
-            [2, 2, 0, 0, 0, 0, -1, -1, -1],
-            [2, 2, 0, 0, 0, -1, -1, -1, -1],
-        ];
-
-        let skipCol = 4;
+        let skipCol = 4; //to keep only the big hexagon grid
+        let scale = 0.9;
 
         const A = (this.cols) * Math.cos(this.alpha / 2) * 3 - Math.cos(this.alpha / 2);
         const B = this.rows * 2 - ((this.rows - 1) * Math.sin(this.alpha / 2));
 
         const A2 = (skipCol) * Math.cos(this.alpha / 2) * 2;
 
-        this.sizeX = this.canvas.width / (A - A2);
-        this.sizeY = this.canvas.height / B;
+        this.sizeX = scale * this.canvas.width / (A - A2);
+        this.sizeY = scale * this.canvas.height / B;
 
         this.size = Math.min(this.sizeX, this.sizeY); // taille d'un hexagone
 
@@ -98,7 +101,7 @@ class Game extends GameBase { //A renommer ?
                 var coordX = x * 2 * Math.cos(this.alpha * 0.5) * this.size + y * Math.cos(this.alpha * 0.5) * this.size + centerX + this.size * Math.cos(this.alpha / 2);
                 var coordY = y * 3 * Math.sin(this.alpha * 0.5) * this.size + centerY + this.size / 2 + Math.sin(this.alpha / 2) * this.size;
                 this.grid[x][y] = this.createHexagon(coordX, coordY);
-                this.grid[x][y].type = coordsGrid[x][y];
+                // this.grid[x][y].id = coordsGrid[x][y];
                 this.grid[x][y].cx = x;
                 this.grid[x][y].cy = y;
             }
@@ -118,15 +121,6 @@ class Game extends GameBase { //A renommer ?
     }
 
     initEvent() {
-        // this.canvas.onmouseup = (e) => {
-        //     this.mouseAction(e);
-        //     this.mousePressed = false;
-        // }
-
-        // this.canvas.onmousedown = (e) => {
-        //     console.log("1");
-        //     this.mousePressed = true;
-        // }
         this.canvas.onmousedown = (e) => {
             this.mouseAction(e);
         };
@@ -163,16 +157,14 @@ class Game extends GameBase { //A renommer ?
 
         let target = this.selectHexagon(this.mouseX, this.mouseY);
 
-        // if (target.type != 1) target.type = 1;
-        // else target.type = 0;
         if (this.mouseStep == 1) {
-            if (target.type == this.playerToPlay) {
+            if (this.coordsGrid[target.cx][target.cy] == this.playerToPlay) {
                 this.firstAction(target);
 
                 this.mouseStep = 2;
             }
         } else if (this.mouseStep == 2) {
-            if (target.type == this.playerToPlay) {
+            if (this.coordsGrid[target.cx][target.cy] == this.playerToPlay) {
                 this.firstAction(target);
             } else {
                 this.secondAction(target);
@@ -186,13 +178,109 @@ class Game extends GameBase { //A renommer ?
 
         this.x1 = target.cx;
         this.y1 = target.cy;
+
+        this.showPotentialMove(this.x1, this.y1);
+    }
+
+    showPotentialMove(ox, oy) {
+        this.showMoveDirection(ox, oy, 1, 0);
+        this.showMoveDirection(ox, oy, -1, 0);
+        this.showMoveDirection(ox, oy, 0, 1);
+        this.showMoveDirection(ox, oy, 0, -1);
+        this.showMoveDirection(ox, oy, 1, -1);
+        this.showMoveDirection(ox, oy, -1, 1);
+    }
+
+    showMoveDirection(cx, cy, dx, dy) {
+        let team = this.coordsGrid[cx][cy];
+
+        let nbPieceTeam = 1;
+        let nbPieceOpponent = 0;
+
+        while (true) {
+            cx += dx;
+            cy += dy;
+
+            let coordContext = this.checkCoordContext(cx, cy)
+
+            if (coordContext == -1) { //on atteint le bord
+                if (nbPieceTeam <= nbPieceOpponent || nbPieceOpponent == 0) { //illegale move !
+                    this.resetGridByID(this.actionGrid, 10, 0); //replace temp value
+                    this.resetGridByID(this.actionGrid, 20, 0); //replace temp value
+                    break;
+                }
+                this.resetGridByID(this.actionGrid, 10, 3); //Reussite
+                this.resetGridByID(this.actionGrid, 20, 4); //Reussite
+                break;
+            } else if (coordContext == team) { //team
+                if (nbPieceOpponent > 0 || nbPieceTeam == 3) { //bloqué par une boule de notre team ou trop de boule
+                    this.resetGridByID(this.actionGrid, 10, 0); //replace temp value
+                    this.resetGridByID(this.actionGrid, 20, 0); //replace temp value
+                    break;
+                }
+                nbPieceTeam++;
+                this.actionGrid[cx][cy] = 10;
+            } else if (coordContext == 0) { //on atteint une case vide
+                if (nbPieceTeam <= nbPieceOpponent) {
+                    this.resetGridByID(this.actionGrid, 10, 0); //replace temp value
+                    this.resetGridByID(this.actionGrid, 20, 0); //replace temp value
+                    break;
+                }
+                this.actionGrid[cx][cy] = 4;
+                this.resetGridByID(this.actionGrid, 10, 3); //Reussite
+                this.resetGridByID(this.actionGrid, 20, 4); //Reussite
+                break;
+            } else { //Player 2...
+                if (nbPieceOpponent >= nbPieceTeam) { //illegale
+                    this.resetGridByID(this.actionGrid, 10, 0);
+                    this.resetGridByID(this.actionGrid, 20, 0);
+                    break;
+                }
+                nbPieceOpponent++;
+                this.actionGrid[cx][cy] = 20; //Val temporaire
+            }
+        }
+    }
+
+    checkCoordContext(cx, cy) {
+        if (cx >= this.coordsGrid.length || cy >= this.coordsGrid[0].length || cx < 0 || cy < 0) return -1; //vide
+
+        return this.coordsGrid[cx][cy]; //other
     }
 
     secondAction(target) {
-        this.actionGrid[target.cx][target.cy] = 2;
-
         this.x2 = target.cx;
         this.y2 = target.cy;
+
+        //Confirmation visuel
+        if (this.actionGrid[target.cx][target.cy] == 4) {
+            //Calculate direcction
+            let dx = this.x2 - this.x1;
+            let dy = this.y2 - this.y1;
+
+            if ((Math.abs(dx) == Math.abs(dy)) || (dx == 0 && dy != 0) || (dy == 0 && dx != 0)) {
+                //normalize
+                dx /= Math.max(Math.abs(dx), 1); //max pour évitere division par 0
+                dy /= Math.max(Math.abs(dy), 1);
+
+                console.log(`MOVE : ox : ${this.x1} | oy : ${this.y1} | dx : ${dx} | dy : ${dy}`);
+
+                this.actionGrid[target.cx][target.cy] = 2; //on affiche l'arrivée en rouge
+
+                let result = this.abalone.play(this.x1, this.y1, dx, dy); //ON JOUE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                if (result == 0) {
+                    this.coordsGrid = this.abalone.grid;
+                    console.log(this.abalone.grid);
+                    this.switchPlayerToPlay();
+                }
+            }
+        } else {}
+        this.resetGrid(this.actionGrid, 0);
+    }
+
+    switchPlayerToPlay() {
+        if (this.playerToPlay == 1) this.playerToPlay = 2;
+        else this.playerToPlay = 1;
     }
 
     selectHexagon(mX, mY) {
@@ -241,35 +329,46 @@ class Game extends GameBase { //A renommer ?
         /*--------------------------------------------------------------*/
 
         //this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.width);
-        this.ctx.fillStyle = "rgb(210,210,210)";
+        // this.ctx.fillStyle = "rgb(210,210,210)";
+        this.ctx.fillStyle = "#F4D527";
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         /*------------------------------GRID-----------------------------*/
         this.displayGrid();
     }
 
-    displayGrid() {
+    displayGrid(debug = false) {
         for (var x = 0; x < this.grid.length; x++) {
             for (var y = 0; y < this.grid[0].length; y++) {
                 let color = "white"
-
-                switch (this.grid[x][y].type) { //Background color
+                switch (this.coordsGrid[x][y]) { //Background color
                     case -1:
                         continue;
+                        // color = "#AACAFE";
                         break;
 
                     default:
                         color = "#F4D527";
+                        color = "rgb(200,200,200)"
+                        color = "#AACAFE";
                         break;
                 }
-
+                //console.log(this.actionGrid[x][y]);
                 switch (this.actionGrid[x][y]) {
                     case 1:
-                        color = "#50e42b";
+                        color = "#50e42b"; //Start
                         break;
 
                     case 2:
-                        color = "#ff5500";
+                        color = "#ff5500"; //Finish
+                        break;
+
+                    case 3:
+                        color = "pink"; //Move possible
+                        break;
+
+                    case 4:
+                        color = "orange"; //Move play
                         break;
                 }
 
@@ -284,17 +383,19 @@ class Game extends GameBase { //A renommer ?
                 this.ctx.stroke(); //end
                 this.ctx.fill();
 
-                this.ctx.font = this.size / 3 + "px serif";
-                this.ctx.fillStyle = "black";
-                this.ctx.textAlign = "center";
-                this.ctx.textBaseline = 'middle';
-                this.ctx.fillText(x + " | " + y, this.grid[x][y].points[0].x - this.size, this.grid[x][y].points[0].y - this.size / 2);
+                if (debug) {
+                    this.ctx.font = this.size / 3 + "px serif";
+                    this.ctx.fillStyle = "black";
+                    this.ctx.textAlign = "center";
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(x + " | " + y, this.grid[x][y].points[0].x - this.size, this.grid[x][y].points[0].y - this.size / 2);
+                }
             }
         }
 
         for (var x = 0; x < this.grid.length; x++) {
             for (var y = 0; y < this.grid[0].length; y++) {
-                switch (this.grid[x][y].type) {
+                switch (this.coordsGrid[x][y]) {
                     case 1:
                         this.ctx.fillStyle = "#000000";
                         this.ctx.beginPath();
@@ -303,7 +404,7 @@ class Game extends GameBase { //A renommer ?
                         break;
 
                     case 2:
-                        this.ctx.fillStyle = "blue";
+                        this.ctx.fillStyle = "red";
                         this.ctx.beginPath();
                         this.ctx.ellipse(this.grid[x][y].x, this.grid[x][y].y, 4 * this.size / 7, 4 * this.size / 7, 0, 0, 2 * Math.PI);
                         this.ctx.fill();
@@ -332,6 +433,14 @@ class Game extends GameBase { //A renommer ?
             }
         }
     }
+
+    resetGridByID(grid, id, val) {
+        for (var x = 0; x < grid.length; x++) {
+            for (var y = 0; y < grid[0].length; y++) {
+                if (grid[x][y] == id) grid[x][y] = val;
+            }
+        }
+    }
 }
 
 class Hexagon {
@@ -339,7 +448,7 @@ class Hexagon {
         this.x = x;
         this.y = y;
         this.points = points;
-        this.type = 0;
+        // this.id = 0;
 
         this.cx = -1;
         this.cy = -1;
