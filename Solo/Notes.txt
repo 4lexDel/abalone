@@ -1,2 +1,0 @@
-- Autoriser la possibilité d'éjécter ses propres pièces ?
-- Ou cliquer pour faire tomber une pièce ?
