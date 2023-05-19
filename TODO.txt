@@ -1,0 +1,14 @@
+Client :
+    1. rejouer ==> Random ?
+
+    timer
+    
+    afficher la liste des rooms
+
+    Crer des logs !!
+
+    reverse plateau
+    avoir que nos move possible
+
+Server :
+    Gestion player 1/2 a revoir ?

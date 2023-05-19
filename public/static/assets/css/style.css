@@ -1,0 +1,233 @@
+body {
+    background-color: #c7c7c7;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.main-title {
+    text-align: center;
+    font-size: 40px;
+    margin: 0;
+    text-decoration: underline;
+}
+
+.svg-icon {
+    width: 50px;
+    height: 50px;
+    /* display: block; */
+    transition-duration: 0.7s;
+}
+
+.svg-icon:hover {
+    transition-duration: 0.2s;
+    transition-timing-function: ease-in-out;
+    /* transform: rotate(60deg); */
+    transform: translate(-6px) rotate(5deg);
+}
+
+.svg-icon:hover path {
+    fill: blue;
+}
+
+.svg-icon:active path {
+    fill: red;
+}
+
+.info-tab {
+    position: fixed;
+    right: 0;
+    top: 0;
+    max-width: 50%;
+    padding: 20px;
+    border: black 2px solid;
+    border-bottom-left-radius: 25px;
+    background-color: #f1f1f1;
+    border-right: none;
+    border-top: none;
+    z-index: 1;
+}
+
+.content-info {
+    display: none;
+}
+
+.setting-tab {
+    position: fixed;
+    left: 0;
+    top: 0;
+    max-width: 50%;
+    padding: 20px;
+    border: black 2px solid;
+    border-bottom-right-radius: 25px;
+    background-color: #f1f1f1;
+    border-left: none;
+    border-top: none;
+    z-index: 1;
+}
+
+.info {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.player-content {
+    margin-top: 5px;
+    height: max-content;
+    max-height: 100px;
+    width: 100%;
+    overflow: auto;
+    border: 1px rgb(118, 118, 118) solid;
+}
+
+.disconnected {
+    background-color: red;
+    color: white;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+.connected {
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+.informal {
+    background-color: grey;
+    color: black;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+.close-button {
+    background-color: red;
+    border-radius: 20%;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+}
+
+.close-button:active {
+    background-color: white;
+    color: red;
+    border: red 1px solid;
+}
+
+.tooltip {
+    position: relative;
+}
+
+.tooltip .tooltip-text {
+    left: 30px;
+    visibility: hidden;
+    position: absolute;
+    z-index: 1;
+    width: max-content;
+    background-color: rgb(222, 222, 222);
+    color: black;
+    border: 1px solid black;
+    text-align: left;
+    padding: 5px 5px;
+    border-radius: 6px;
+}
+
+.tooltip:hover .tooltip-text {
+    visibility: visible;
+}
+
+.help-button {
+    border-radius: 20%;
+    padding: 5px 10px;
+    background-color: white;
+    color: grey;
+    border: grey 1px solid;
+}
+
+.primary {
+    background-color: rgb(85, 85, 233);
+    border-radius: 5%;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+}
+
+.primary:active {
+    background-color: white;
+    color: rgb(85, 85, 233);
+    border: 1px rgb(85, 85, 233) solid;
+}
+
+.second {
+    background-color: white;
+    border-radius: 5%;
+    color: green;
+    padding: 5px 10px;
+    border: 1px green solid;
+}
+
+.second:active {
+    background-color: green;
+    color: white;
+}
+
+canvas {
+    background-color: transparent;
+}
+
+.game-content {
+    position: fixed;
+    /* background-color: #59accf; */
+    width: 90%;
+    height: 70%;
+    left: 5%;
+    bottom: 5%;
+}
+
+.score-content {
+    position: fixed;
+    /* background-color: #535353; */
+    background-color: #9a9a9a;
+    /* background-color: #F4D527; */
+    /* min-height: max-content; */
+    left: 5%;
+    width: 90%;
+    height: 10%;
+    bottom: 75%;
+}
+
+.score-content * {
+    display: block;
+    text-align: center;
+    margin: auto auto;
+    font-size: 30px;
+}
+
+.text-moving {
+    /* max-width: 30em; */
+    /* largeur de la fenêtre */
+    /* margin: 1em auto 2em; */
+    overflow: hidden;
+}
+
+.text-moving> :first-child {
+    display: inline-block;
+    /* modèle de boîte en ligne */
+    padding-right: 2em;
+    /* un peu d'espace pour la transition */
+    padding-left: 100%;
+    /* placement à droite du conteneur */
+    white-space: nowrap;
+    /* pas de passage à la ligne */
+    animation: defilement 10s infinite linear;
+}
+
+@keyframes defilement {
+    0% {
+        transform: translate3d(0, 0, 0);
+        /* position initiale à droite */
+    }
+    100% {
+        transform: translate3d(-100%, 0, 0);
+        /* position finale à gauche */
+    }
+}
